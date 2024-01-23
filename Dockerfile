@@ -1,4 +1,10 @@
-FROM openjdk:8
+FROM maven:3.6.3-jdk-11-slim AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+FROM openjdk:11-jre-slim
+WORKDIR /usr/app
+COPY --from=build /app/target/myapp.jar ./myapp.jar
 EXPOSE 8080
-ADD target/springboot-crud-k8s.jar springboot-crud-k8s.jar
-ENTRYPOINT ["java","-jar","/springboot-crud-k8s.jar"]
+CMD ["java", "-jar", "myapp.jar"]
